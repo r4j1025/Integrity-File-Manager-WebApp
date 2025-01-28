@@ -7,6 +7,7 @@ import {
     query,
   } from "./_generated/server";
 import { getUser } from "./users";
+import { fileTypes } from "./schema";
 
 export const generateUploadUrl = mutation(async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -29,6 +30,7 @@ export const createFile = mutation({
         name:v.string(),
         fileId: v.id("_storage"),
         orgId:v.string(),
+        type: fileTypes,
     },
     async handler(ctx, args) {
         //throw new Error("he he he");
@@ -48,13 +50,16 @@ export const createFile = mutation({
           name: args.name,
           orgId: args.orgId,
           fileId: args.fileId,
+          type: args.type,
         })
     },
 });
 
 export const getFiles = query({
+    //edit for geturl
     args: {
         orgId: v.string(),
+        query: v.optional(v.string()),
     },
     async handler(ctx, args){
         const identity = await ctx.auth.getUserIdentity();
@@ -68,7 +73,24 @@ export const getFiles = query({
         if(!hasAccess){
             return [];
         }
-        return ctx.db.query('files').withIndex('by_orgId', q=> q.eq('orgId', args.orgId)).collect()
+        const files = await ctx.db.query('files').withIndex('by_orgId', q=> q.eq('orgId', args.orgId)).collect()
+
+        const query = args.query;
+
+        if(query){
+            return files.filter((file)=>file.name.toLowerCase().includes(query.toLowerCase()))
+        }else{
+            return files;
+        }
+
+        // const filesWithUrl = await Promise.all(
+        //     files.map(async (file) => ({
+        //       ...file,
+        //       url: await ctx.storage.getUrl(file.fileId),
+        //     }))
+        //   );
+      
+        //   return filesWithUrl;
     }
 })
 

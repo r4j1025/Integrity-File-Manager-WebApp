@@ -49,7 +49,7 @@ export function SearchBar({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input {...field} placeholder="your file names" />
+                  <Input {...field} placeholder="your file name" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
