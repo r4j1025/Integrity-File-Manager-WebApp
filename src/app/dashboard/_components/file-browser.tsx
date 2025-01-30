@@ -135,7 +135,7 @@ export function FileBrowser({
         <TabsContent value="grid">
           <div className="grid grid-cols-3 gap-4">
             {modifiedFiles?.map((file) => {
-              return <FileCard key={file._id} file={file} />;
+              return <FileCard favorites={favorites??[]} key={file._id} file={file} />;
             })}
           </div>
         </TabsContent>
