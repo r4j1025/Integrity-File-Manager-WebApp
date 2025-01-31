@@ -5,6 +5,7 @@ import {
   internalMutation,
   query,
 } from "./_generated/server";
+import { roles } from "./schema";
 // import { roles } from "./schema";
 // import { hasAccessToOrg } from "./files";
 
@@ -72,36 +73,36 @@ export const createUser = internalMutation({
 // });
 
 export const addOrgIdToUser = internalMutation({
-  args: { tokenIdentifier: v.string(), orgId: v.string(), },
+  args: { tokenIdentifier: v.string(), orgId: v.string(), role: roles},
   async handler(ctx, args) {
     const user = await getUser(ctx, args.tokenIdentifier);
 
     await ctx.db.patch(user._id, {
-      orgIds: [...user.orgIds, args.orgId],
+      orgIds: [...user.orgIds,{orgId: args.orgId, role: args.role} ],
     });
   },
 });
 
-// export const updateRoleInOrgForUser = internalMutation({
-//   args: { tokenIdentifier: v.string(), orgId: v.string(), role: roles },
-//   async handler(ctx, args) {
-//     const user = await getUser(ctx, args.tokenIdentifier);
+export const updateRoleInOrgForUser = internalMutation({
+  args: { tokenIdentifier: v.string(), orgId: v.string(), role: roles },
+  async handler(ctx, args) {
+    const user = await getUser(ctx, args.tokenIdentifier);
 
-//     const org = user.orgIds.find((org) => org.orgId === args.orgId);
+    const org = user.orgIds.find((org) => org.orgId === args.orgId);
 
-//     if (!org) {
-//       throw new ConvexError(
-//         "expected an org on the user but was not found when updating"
-//       );
-//     }
+    if (!org) {
+      throw new ConvexError(
+        "expected an org on the user but was not found when updating"
+      );
+    }
 
-//     org.role = args.role;
+    org.role = args.role;
 
-//     await ctx.db.patch(user._id, {
-//       orgIds: user.orgIds,
-//     });
-//   },
-// });
+    await ctx.db.patch(user._id, {
+      orgIds: user.orgIds,
+    });
+  },
+});
 
 // export const getUserProfile = query({
 //   args: { userId: v.id("users") },

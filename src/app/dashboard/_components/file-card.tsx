@@ -36,8 +36,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
+import { Protect } from "@clerk/nextjs";
 
-//2:54
 function FileCardActions({file, isFavorited}:{file: Doc<"files">, isFavorited: boolean}){
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const deleteFile = useMutation(api.files.deleteFile);
@@ -84,12 +84,27 @@ return (
       className="flex gap-1 items-center cursor-pointer">
         {isFavorited ? (<div  className="flex gap-1 items-center"><StarOff  className="w-4 h-4"/> Unfavorite</div>): <div  className="flex gap-1 items-center"><StarIcon  className="w-4 h-4"/> Favorite</div>}
     </DropdownMenuItem>
-    <DropdownMenuSeparator/>
-    <DropdownMenuItem
-      onClick={()=>setIsConfirmOpen(true)}
-      className="flex gap-1 text-red-600 items-center cursor-pointer">
-      <TrashIcon className="w-4 h-4"/> Delete
-    </DropdownMenuItem>
+    {/* <Protect
+            // condition={(check) => {
+            //   return (
+            //     check({
+            //       role: "org:admin",
+            //     }) || file.userId === me?._id
+            //   );
+            // }}
+            role="org:admin" 
+            fallback={<></>}
+          > */}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                  setIsConfirmOpen(true);
+              }}
+              className="flex gap-1 items-center cursor-pointer"
+            >
+                  <TrashIcon className="w-4 h-4" /> Delete
+            </DropdownMenuItem>
+          {/* </Protect> */}
   </DropdownMenuContent>
 </DropdownMenu>
 </>
@@ -116,7 +131,8 @@ export function FileCard({
     csv: <GanttChartIcon />,
   } as Record<Doc<"files">["type"], ReactNode>;
 
-    const isFavorited = favorites.some(favorite=> favorite.fileId === file._id)
+  const isFavorited = favorites?.some(favorite => favorite.fileId === file._id) ?? false;
+  // const isFavorited = favorites.some(favorite=> favorite.fileId === file._id) self modified
 
   return (
     <Card>
