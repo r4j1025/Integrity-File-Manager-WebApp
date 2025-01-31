@@ -11,6 +11,7 @@ import {
   MoreVertical,
   StarHalf,
   StarIcon,
+  StarOff,
   TrashIcon,
   UndoIcon,
 } from "lucide-react";
@@ -34,7 +35,7 @@ export function FileCardActions({
   file,
   isFavorited,
 }: {
-  file: Doc<"files"> & { url: string | null };
+   file: Doc<"files"> & { url: string | null };
   isFavorited: boolean;
 }) {
   const deleteFile = useMutation(api.files.deleteFile);
@@ -90,6 +91,7 @@ export function FileCardActions({
           >
             <FileIcon className="w-4 h-4" /> Download
           </DropdownMenuItem>
+          
 
           <DropdownMenuItem
             onClick={() => {
@@ -101,13 +103,14 @@ export function FileCardActions({
           >
             {isFavorited ? (
               <div className="flex gap-1 items-center">
-                <StarIcon className="w-4 h-4" /> Unfavorite
+                <StarOff className="w-4 h-4" /> Unfavorite
               </div>
             ) : (
               <div className="flex gap-1 items-center">
-                <StarHalf className="w-4 h-4" /> Favorite
+                <StarIcon className="w-4 h-4" /> Favorite
               </div>
             )}
+            
           </DropdownMenuItem>
 
           <Protect
