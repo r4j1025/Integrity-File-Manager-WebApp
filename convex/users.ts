@@ -6,41 +6,28 @@ import {
   query,
 } from "./_generated/server";
 import { roles } from "./schema";
-// import { roles } from "./schema";
-// import { hasAccessToOrg } from "./files";
+import { hasAccessToOrg } from "./files";
 
-// export async function getUser(
-//   ctx: QueryCtx | MutationCtx,
-//   tokenIdentifier: string
-// ) {
-//   const user = await ctx.db
-//     .query("users")
-//     .withIndex("by_tokenIdentifier", (q) =>
-//       q.eq("tokenIdentifier", tokenIdentifier)
-//     )
-//     .first();
+export async function getUser(
+  ctx: QueryCtx | MutationCtx,
+  tokenIdentifier: string
+) {
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_tokenIdentifier", (q) =>
+      q.eq("tokenIdentifier", tokenIdentifier)
+    )
+    .first();
 
-//   if (!user) {
-//     throw new ConvexError("expected user to be defined");
-//   }
+  if (!user) {
+    throw new ConvexError("expected user to be defined");
+  }
 
-//   return user;
-// }
-
-export async function getUser(ctx: QueryCtx | MutationCtx, tokenIdentifier: string){
-    
-
-    const user = await ctx.db.query("users").withIndex('by_tokenIdentifier' , q=> q.eq("tokenIdentifier", tokenIdentifier)).first();
-
-    if(!user) {
-        throw new ConvexError("expected user to be defined");
-    }
-
-    return user;
-} 
+  return user;
+}
 
 export const createUser = internalMutation({
-  args: { tokenIdentifier: v.string(), name: v.string(), image: v.string()},
+  args: { tokenIdentifier: v.string(), name: v.string(), image: v.string() },
   async handler(ctx, args) {
     await ctx.db.insert("users", {
       tokenIdentifier: args.tokenIdentifier,
@@ -73,12 +60,12 @@ export const updateUser = internalMutation({
 });
 
 export const addOrgIdToUser = internalMutation({
-  args: { tokenIdentifier: v.string(), orgId: v.string(), role: roles},
+  args: { tokenIdentifier: v.string(), orgId: v.string(), role: roles },
   async handler(ctx, args) {
     const user = await getUser(ctx, args.tokenIdentifier);
 
     await ctx.db.patch(user._id, {
-      orgIds: [...user.orgIds,{orgId: args.orgId, role: args.role} ],
+      orgIds: [...user.orgIds, { orgId: args.orgId, role: args.role }],
     });
   },
 });
