@@ -28,11 +28,10 @@ export default function LandingPage() {
             />
 
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              The easiest way to upload and share files with your company
+            Effortlessly upload, manage, and share your files with your team, or keep them secure as personal storage.
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              Make and account and start managing your files in less than a
-              minute.
+            All while ensuring the highest level of security and integrity for your collaborative files.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link

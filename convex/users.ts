@@ -6,7 +6,6 @@ import {
   query,
 } from "./_generated/server";
 import { roles } from "./schema";
-import { hasAccessToOrg } from "./files";
 
 export async function getUser(
   ctx: QueryCtx | MutationCtx,

@@ -9,7 +9,6 @@ import {
 import {
   FileIcon,
   MoreVertical,
-  StarHalf,
   StarIcon,
   StarOff,
   TrashIcon,

@@ -4,7 +4,6 @@ import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 
 const http = httpRouter();
-// 3:44"
 http.route({
   path: "/clerk",
   method: "POST",
