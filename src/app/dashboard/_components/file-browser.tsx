@@ -9,6 +9,14 @@ import { GridIcon, Loader2, RowsIcon } from "lucide-react";
 import { SearchBar } from "./search-bar";
 import { useState } from "react";
 import { DataTable } from "./file-table";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { columns } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -20,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Doc } from "../../../../convex/_generated/dataModel";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 function Placeholder() {
   return (
@@ -74,6 +83,8 @@ export function FileBrowser({
   );
   const isLoading = files === undefined;
 
+  const logs = useQuery(api.files.getLogsByOrgId, orgId ? { orgId } : "skip"); // Query to get logs
+
   const modifiedFiles =
     files?.map((file) => ({
       ...file,
@@ -103,6 +114,55 @@ export function FileBrowser({
               <RowsIcon /> Table
             </TabsTrigger>
           </TabsList>
+
+          {/* Logs Button */}
+          <Sheet>
+            <SheetTrigger>
+              <Button variant={"outline"}>Show Logs</Button>
+            </SheetTrigger>
+            <SheetContent className="">
+              <SheetHeader>
+                <SheetTitle>Log history of the folder</SheetTitle>
+                <SheetDescription>
+                  This shows all actions performed on files within the
+                  organization.
+                </SheetDescription>
+              </SheetHeader>
+                {/* Displaying logs as divs */}
+              <div className="">
+              {isLoading ? (
+            <div>Loading logs...</div>
+          ) : (
+            <div className=" flex mt-2 flex-col-reverse overflow-y-scroll min-h-screen: max-h-[750px] space-y-4">
+              {logs?.map((log, index) => (
+                <div
+                  key={index}
+                  className="border-b py-4"
+                >
+                  <div className="flex flex-col justify-between">
+                  <div>
+                    <strong>File name:</strong> {log.fileName}
+                  </div>
+                    <div>
+                      <strong>Action performed:</strong> {log.action}
+                    </div>
+                  <div>
+                    <strong>performed by:</strong> {log.userName}
+                  </div>
+                    <div>
+                      <strong>Time:</strong> {new Date(log._creationTime).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+            </div>
+          )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          
 
           <div className="flex gap-2 items-center">
             <Label htmlFor="type-select">Type Filter</Label>

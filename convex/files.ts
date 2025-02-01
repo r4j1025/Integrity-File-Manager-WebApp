@@ -139,6 +139,31 @@ export const createFile = mutation({
   },
 });
 
+
+export const getLogsByOrgId = query({
+  args: {
+    orgId: v.string(),
+  },
+  async handler(ctx, args) {
+    // Check if the user has access to the organization
+    const hasAccess = await hasAccessToOrg(ctx, args.orgId);
+
+    if (!hasAccess) {
+      return [];
+    }
+
+    // Query the logs associated with the given orgId
+    const logs = await ctx.db
+      .query("logs")
+      .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
+      .collect();
+
+    // Return the logs
+    return logs;
+  },
+});
+
+
 export const getFiles = query({
   args: {
     orgId: v.string(),
@@ -196,6 +221,14 @@ export const getFiles = query({
         url: await ctx.storage.getUrl(file.fileId),
       }))
     );
+
+  //   const logs = await ctx.db
+  //   .query("logs")
+  //   .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
+  //   .collect();
+
+  // console.log("Logs for orgId:", args.orgId);
+  // console.log(logs); // This will log the logs for the orgId
 
     return filesWithUrl;
   },
