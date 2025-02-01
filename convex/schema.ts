@@ -37,4 +37,24 @@ export default defineSchema({
       })
     ),
   }).index("by_tokenIdentifier", ["tokenIdentifier"]),
+
+
+  
+  logs: defineTable({
+    action: v.union(
+      v.literal("uploaded"),
+      v.literal("deleted"),
+      v.literal("favorited"),
+      v.literal("unfavorited"),
+      v.literal("downloaded"),
+      v.literal("restored"),
+    ),
+    userName: v.string(),      // User who performed the action
+    fileName: v.string(),  // ✅ Added file name for better tracking
+    orgId: v.string(),         // Organization ID
+    fileId: v.id("files"),     // File ID being affected
+  })
+    .index("by_orgId", ["orgId"]),  // Index to query logs by organization
+
+
 });

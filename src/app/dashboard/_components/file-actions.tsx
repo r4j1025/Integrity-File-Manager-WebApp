@@ -1,4 +1,5 @@
-import { Doc, Id } from "../../../../convex/_generated/dataModel";
+import { Doc,} from "../../../../convex/_generated/dataModel";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +41,7 @@ export function FileCardActions({
   const deleteFile = useMutation(api.files.deleteFile);
   const restoreFile = useMutation(api.files.restoreFile);
   const toggleFavorite = useMutation(api.files.toggleFavorite);
+  const logDownload = useMutation(api.files.logDownload);  // Mutation for logging the download
   const { toast } = useToast();
   const me = useQuery(api.users.getMe);
 
@@ -82,9 +84,16 @@ export function FileCardActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
-            onClick={() => {
+            onClick={async () => {
               if (!file.url) return;
               window.open(file.url, "_blank");
+
+              // Call the logDownload mutation
+              await logDownload({
+                fileId: file._id,
+                orgId: file.orgId,
+                fileName: file.name,
+              });
             }}
             className="flex gap-1 items-center cursor-pointer"
           >

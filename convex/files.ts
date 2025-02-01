@@ -9,6 +9,7 @@ import {
 import { fileTypes } from "./schema";
 import { Doc, Id } from "./_generated/dataModel";
 
+
 export const generateUploadUrl = mutation(async (ctx) => {
   const identity = await ctx.auth.getUserIdentity();
 
@@ -51,6 +52,60 @@ export async function hasAccessToOrg(
   return { user };
 }
 
+
+export const logDownload = mutation({
+  args: {
+    fileId: v.id("files"),
+    orgId: v.string(),
+    fileName: v.string(),
+  },
+  async handler(ctx, args) {
+    await createLog(
+      ctx, 
+      args.orgId, 
+      args.fileId, 
+      args.fileName, 
+      "downloaded"
+    );
+  },
+});
+
+
+export async function createLog(
+  ctx: MutationCtx,
+  orgId: string,
+  fileId: Id<"files">,
+  fileName: string, // ✅ Include file name in logs
+  action: "uploaded" | "deleted" | "favorited" | "unfavorited" | "downloaded" | "restored"
+) {
+  const identity = await ctx.auth.getUserIdentity();
+
+  if (!identity) {
+    throw new ConvexError("You must be logged in to perform this action");
+  }
+
+  // 🔍 Fetch user details
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_tokenIdentifier", (q) =>
+      q.eq("tokenIdentifier", identity.tokenIdentifier)
+    )
+    .first();
+
+  if (!user) {
+    throw new ConvexError("User not found");
+  }
+
+  // ✅ Insert log with userName
+  await ctx.db.insert("logs", {
+    action,
+    userName: user.name || "Unknown User", // ✅ Use user name
+    fileName, // ✅ Include file name
+    orgId,
+    fileId,
+  });
+}
+
 export const createFile = mutation({
   args: {
     name: v.string(),
@@ -65,13 +120,22 @@ export const createFile = mutation({
       throw new ConvexError("you do not have access to this org");
     }
 
-    await ctx.db.insert("files", {
+    const file = await ctx.db.insert("files", {
       name: args.name,
       orgId: args.orgId,
       fileId: args.fileId,
       type: args.type,
       userId: hasAccess.user._id,
     });
+
+    await createLog(ctx, args.orgId, file, args.name, "uploaded");
+
+
+
+    // let files = await ctx.db
+    //   .query("files")
+    //   .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
+    //   .collect();
   },
 });
 
@@ -178,6 +242,9 @@ export const deleteFile = mutation({
     await ctx.db.patch(args.fileId, {
       shouldDelete: true,
     });
+
+    await createLog(ctx, access.file.orgId, args.fileId, access.file.name, "deleted");
+
   },
 });
 
@@ -195,6 +262,14 @@ export const restoreFile = mutation({
     await ctx.db.patch(args.fileId, {
       shouldDelete: false,
     });
+
+    await createLog(
+      ctx,
+      access.file.orgId, // orgId from the file access object
+      access.file._id,    // fileId of the restored file
+      access.file.name,   // fileName of the restored file
+      "restored"          // action type
+    );
   },
 });
 
@@ -217,15 +292,21 @@ export const toggleFavorite = mutation({
       )
       .first();
 
+      let action: "favorited" | "unfavorited";
+
     if (!favorite) {
       await ctx.db.insert("favorites", {
         fileId: access.file._id,
         userId: access.user._id,
         orgId: access.file.orgId,
       });
+      action = "favorited";
     } else {
       await ctx.db.delete(favorite._id);
+      action = "unfavorited";
     }
+
+    await createLog(ctx, access.file.orgId, access.file._id, access.file.name, action);
   },
 });
 
