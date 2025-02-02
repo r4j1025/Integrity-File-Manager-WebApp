@@ -28,6 +28,7 @@ http.route({
             name: `${result.data.first_name ?? ""} ${
               result.data.last_name ?? ""
             }`,
+            email: result.data.email_addresses[0]?.email_address ?? "", // ✅ Store email
             image: result.data.image_url,
           });
           break;
@@ -37,6 +38,8 @@ http.route({
             name: `${result.data.first_name ?? ""} ${
               result.data.last_name ?? ""
             }`,
+            email: result.data.email_addresses[0]?.email_address ?? "", // ✅ Update email
+
             image: result.data.image_url,
           });
           break;

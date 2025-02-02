@@ -28,6 +28,7 @@ export default defineSchema({
   }).index("by_userId_orgId_fileId", ["userId", "orgId", "fileId"]),
   users: defineTable({
     tokenIdentifier: v.string(),
+    email: v.string(), // ✅ Added email field
     name: v.optional(v.string()),
     image: v.optional(v.string()),
     orgIds: v.array(

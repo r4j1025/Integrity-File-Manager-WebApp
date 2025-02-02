@@ -8,6 +8,9 @@ import {
 } from "./_generated/server";
 import { fileTypes } from "./schema";
 import { Doc, Id } from "./_generated/dataModel";
+import emailjs from '@emailjs/browser';
+//import { fetch } from 'convex/server'; // Use Convex's fetch function
+
 
 
 export const generateUploadUrl = mutation(async (ctx) => {
@@ -19,6 +22,28 @@ export const generateUploadUrl = mutation(async (ctx) => {
 
   return await ctx.storage.generateUploadUrl();
 });
+
+
+export const getUserEmailsByOrgId = query({
+  args: {
+    orgId: v.string(),
+  },
+  handler: async (ctx, { orgId }) => {
+    // Fetch all users
+    const users = await ctx.db.query("users").collect();
+
+    // Filter users whose orgIds contain the given orgId
+    const filteredUsers = users.filter(user =>
+      user.orgIds?.some(org => org.orgId === orgId)
+    );
+
+    // Extract emails of the filtered users
+    const emails = filteredUsers.map(user => user.email);
+
+    return emails;
+  },
+});
+
 
 export async function hasAccessToOrg(
   ctx: QueryCtx | MutationCtx,
@@ -106,6 +131,47 @@ export async function createLog(
   });
 }
 
+// export const sendEmail = async ({
+//   emails,
+//   username,
+//   filename,
+//   orgId,
+//   action,
+// }: {
+//   emails: string[];
+//   username: string;
+//   filename: string;
+//   orgId: string;
+//   action: string;
+// })=>{
+//   for (const email of emails) {
+//     const templateParams = {
+//       action: "uploaded",
+//       member: email,
+//       message: `User ${username} has uploaded the file ${filename} in your organization's folder (ID: ${orgId}).`,
+//     };
+
+//     const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({
+//         service_id: "service_ntg9ws8",  // Your service ID
+//         template_id: "IFMid",  // Your template ID
+//         user_id: "Ry69Fz_sOVenvOEFK8T9b",  // Your public key
+//         template_params: templateParams,
+//       }),
+//     });
+
+//     if (!response.ok) {
+//       console.error('Error sending email:', await response.text());
+//     } else {
+//       console.log('Email sent successfully:', await response.json());
+//     }
+//   }
+// }
+
 export const createFile = mutation({
   args: {
     name: v.string(),
@@ -130,14 +196,21 @@ export const createFile = mutation({
 
     await createLog(ctx, args.orgId, file, args.name, "uploaded");
 
+    const username = hasAccess.user.name || "Unknown User";
+    const emails = await getUserEmailsByOrgId(ctx, { orgId: args.orgId });
 
-
-    // let files = await ctx.db
-    //   .query("files")
-    //   .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
-    //   .collect();
+    // if (emails.length > 0) {
+    //   await sendEmail({
+    //     emails,
+    //     username,
+    //     filename: args.name,
+    //     orgId: args.orgId,
+    //     action: "uploaded",
+    //   });
+    // }
   },
 });
+
 
 
 export const getLogsByOrgId = query({
@@ -178,6 +251,12 @@ export const getFiles = query({
     if (!hasAccess) {
       return [];
     }
+
+    // // Call the getUserEmailsByOrgId function to get the emails
+    // const userEmails = await getUserEmailsByOrgId(ctx, { orgId: args.orgId });
+
+    // // Log the emails to the console
+    // console.log('User Emails for OrgId', args.orgId, ':', userEmails);
 
     let files = await ctx.db
       .query("files")
@@ -221,14 +300,6 @@ export const getFiles = query({
         url: await ctx.storage.getUrl(file.fileId),
       }))
     );
-
-  //   const logs = await ctx.db
-  //   .query("logs")
-  //   .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
-  //   .collect();
-
-  // console.log("Logs for orgId:", args.orgId);
-  // console.log(logs); // This will log the logs for the orgId
 
     return filesWithUrl;
   },
