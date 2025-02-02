@@ -34,6 +34,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.50.1",
     "resend": "^4.1.1",
+    "sharp": "^0.33.5",
     "svix": "^1.19.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
