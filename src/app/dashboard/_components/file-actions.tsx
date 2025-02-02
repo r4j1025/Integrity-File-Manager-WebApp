@@ -101,7 +101,7 @@ export function FileCardActions({
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action will mark the file for our deletion process. Files are
-              deleted periodically
+              deleted periodically after 30 days.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -114,8 +114,8 @@ export function FileCardActions({
                 sendEmail("deleted");
                 toast({
                   variant: "default",
-                  title: "File marked for deletion",
-                  description: "Your file will be deleted soon",
+                  title: "File has been moved to trash",
+                  description: "Your file will be deleted after 30 days",
                 });
               }}
             >

@@ -2,21 +2,14 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <div className="h-40 bg-gray-100 mt-12 flex items-center">
-      <div className="container mx-auto flex justify-between items-center">
-        <div>FileDrive</div>
+    <div className="h-20 bg-gray-100 min-w-[750px] flex items-center">
+      <div className="container mx-auto flex justify-center items-center">
 
-        <Link className="text-blue-900 hover:text-blue-500" href="/privacy">
-          Privacy Policy
-        </Link>
         <Link
           className="text-blue-900 hover:text-blue-500"
-          href="/terms-of-service"
+          href="https://www.linkedin.com/in/pushparajl"
         >
-          Terms of Service
-        </Link>
-        <Link className="text-blue-900 hover:text-blue-500" href="/about">
-          About
+          © Website developed by Pushparaj L
         </Link>
       </div>
     </div>

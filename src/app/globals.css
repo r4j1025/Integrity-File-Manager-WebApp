@@ -91,4 +91,5 @@
   body {
     @apply bg-background bg-slate-100 text-foreground;
   }
+  
 }

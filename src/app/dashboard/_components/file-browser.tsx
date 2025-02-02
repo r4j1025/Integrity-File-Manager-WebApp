@@ -104,8 +104,8 @@ export function FileBrowser({
       </div>
 
       <Tabs defaultValue="grid">
-        <div className="flex justify-between items-center">
-          <TabsList className="mb-2">
+        <div className="flex px-8  pb-8 min-w-[520px] justify-between items-center">
+          {/* <TabsList className="mb-2">
             <TabsTrigger value="grid" className="flex gap-2 items-center">
               <GridIcon />
               Grid
@@ -113,7 +113,7 @@ export function FileBrowser({
             <TabsTrigger value="table" className="flex gap-2 mr-2 items-center">
               <RowsIcon /> Table
             </TabsTrigger>
-          </TabsList>
+          </TabsList> */}
           
 
           {/* Logs Button */}
