@@ -114,6 +114,7 @@ export function FileBrowser({
               <RowsIcon /> Table
             </TabsTrigger>
           </TabsList>
+          
 
           {/* Logs Button */}
           <Sheet>
@@ -201,9 +202,9 @@ export function FileBrowser({
             })}
           </div>
         </TabsContent>
-        <TabsContent value="table">
+        {/* <TabsContent value="table">
           <DataTable columns={columns} data={modifiedFiles} />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
 
       {files?.length === 0 && <Placeholder />}
