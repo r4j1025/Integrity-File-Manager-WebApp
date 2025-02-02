@@ -95,8 +95,8 @@ export function FileBrowser({
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">{title}</h1>
+      <div className="flex gap-x-2   justify-between min-w-[520px] items-center mb-8">
+        <h1 className="text-3xl  font-bold">{title}</h1>
 
         <SearchBar query={query} setQuery={setQuery} />
 
@@ -110,7 +110,7 @@ export function FileBrowser({
               <GridIcon />
               Grid
             </TabsTrigger>
-            <TabsTrigger value="table" className="flex gap-2 items-center">
+            <TabsTrigger value="table" className="flex gap-2 mr-2 items-center">
               <RowsIcon /> Table
             </TabsTrigger>
           </TabsList>
@@ -164,7 +164,7 @@ export function FileBrowser({
 
           
 
-          <div className="flex gap-2 items-center">
+          <div className="flex ml-2 gap-2 items-center">
             <Label htmlFor="type-select">Type Filter</Label>
             <Select
               value={type}
@@ -178,6 +178,8 @@ export function FileBrowser({
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="image">Image</SelectItem>
+                <SelectItem value="txt">Text</SelectItem>
+                <SelectItem value="doc">Doc</SelectItem>
                 <SelectItem value="csv">CSV</SelectItem>
                 <SelectItem value="pdf">PDF</SelectItem>
               </SelectContent>
@@ -193,7 +195,7 @@ export function FileBrowser({
         )}
 
         <TabsContent value="grid">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="container min-w-[570px] grid grid-cols-2 sm:grid-cols-3  gap-4">
             {modifiedFiles?.map((file) => {
               return <FileCard key={file._id} file={file} />;
             })}
