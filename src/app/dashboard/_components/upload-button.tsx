@@ -30,6 +30,8 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { Doc } from "../../../../convex/_generated/dataModel";
+import emailjs from '@emailjs/browser';
+
 
 const formSchema = z.object({
   title: z.string().min(1).max(200),
@@ -43,6 +45,12 @@ export function UploadButton() {
   const organization = useOrganization();
   const user = useUser();
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  
+  
+  let orgId: string | undefined = undefined;
+  if (organization.isLoaded && user.isLoaded) {
+    orgId = organization.organization?.id ?? user.user?.id;
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,7 +63,6 @@ export function UploadButton() {
   const fileRef = form.register("file");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values.file);
     if (!orgId) return;
     const postUrl = await generateUploadUrl();
     const fileType = values.file[0].type;
@@ -67,8 +74,12 @@ export function UploadButton() {
     });
     const { storageId } = await result.json();
 
-    console.log(values.file[0].type); // to see and check the type of file 
+    //console.log(values.file[0].type); // to see and check the type of file 
     const types = {
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "doc",
+      "application/msword": "doc",
+      "text/plain":"txt",
+      "image/jpeg": "image",
       "image/png": "image",
       "application/pdf": "pdf",
       "text/csv": "csv",
@@ -83,7 +94,32 @@ export function UploadButton() {
       });
 
       form.reset();
+//////////////////////////////////////////////////////////////////////////////////////////////////
+      if(emails.length>0){
+        for (const email of emails) {
+          const templateParams = {
+            action: "uploaded",
+            member: email,
+            message: `User "${user?.user?.fullName}" has uploaded the file "${values.title}" in your organization's folder
+              
+            Organization folder name: ${orgName}
+            
+            (ID: ${orgId}).`,
+          };//
 
+          emailjs
+            .send("service_ntg9ws8", "IFMid", templateParams, "ImV2HhBVWI1jG0VET")
+            .then(
+              (response) => {
+                console.log("SUCCESS!", response.status, response.text);
+              },
+              (err) => {
+                console.log("FAILED...", err);
+              }
+            );
+        }
+      }
+////////////////////////////////////////////////////////////////////////////////////////
       setIsFileDialogOpen(false);
 
       toast({
@@ -100,10 +136,12 @@ export function UploadButton() {
     }
   }
 
-  let orgId: string | undefined = undefined;
-  if (organization.isLoaded && user.isLoaded) {
-    orgId = organization.organization?.id ?? user.user?.id;
+  const emails = useQuery(api.files.getUserEmailsByOrgId, orgId ? { orgId } : "skip" ) ?? [];
+  let orgName = "Your organization";
+  if(emails!==undefined){
+    orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
   }
+    
 
   const createFile = useMutation(api.files.createFile);
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);

@@ -48,6 +48,8 @@ export function FileCard({
         )}
 
         {file.type === "csv" && <GanttChartIcon className="w-20 h-20" />}
+        {file.type === "doc" && <GanttChartIcon className="w-20 h-20" />}
+        {file.type === "txt" && <GanttChartIcon className="w-20 h-20" />}
         {file.type === "pdf" && <FileTextIcon className="w-20 h-20" />}
       </CardContent>
       <CardFooter className="flex justify-between">

@@ -48,6 +48,7 @@ http.route({
             tokenIdentifier: `https://${process.env.CLERK_HOSTNAME}|${result.data.public_user_data.user_id}`,
             orgId: result.data.organization.id,
             role: result.data.role === "org:admin" ? "admin" : "member",
+            orgName: result.data.organization.name,
           });
           break;
           case "organizationMembership.updated":

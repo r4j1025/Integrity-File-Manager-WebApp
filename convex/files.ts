@@ -9,8 +9,6 @@ import {
 import { fileTypes } from "./schema";
 import { Doc, Id } from "./_generated/dataModel";
 import emailjs from '@emailjs/browser';
-//import { fetch } from 'convex/server'; // Use Convex's fetch function
-
 
 
 export const generateUploadUrl = mutation(async (ctx) => {
@@ -21,6 +19,33 @@ export const generateUploadUrl = mutation(async (ctx) => {
   }
 
   return await ctx.storage.generateUploadUrl();
+});
+
+export const getOrgNameByOrgId = query({
+  args: {
+    orgId: v.string(),
+  },
+  async handler(ctx, { orgId }) {
+    // Fetch all users
+    const users = await ctx.db.query("users").collect();
+
+    // Find the first user whose orgIds contains the given orgId
+    const user = users.find(user =>
+      user.orgIds?.some(org => org.orgId === orgId)
+    );
+
+    if (!user) {
+      return null;
+    }
+
+    // Extract and return the organization name
+    const org = user.orgIds.find(org => org.orgId === orgId);
+    // if (!org) {
+    //   // Handle the case where no organization is found
+    //   return null;  // You can return null, an empty string, or a default organization name
+    // }
+    return org?.orgName || "Unknown Organization";
+  },
 });
 
 
@@ -131,46 +156,6 @@ export async function createLog(
   });
 }
 
-// export const sendEmail = async ({
-//   emails,
-//   username,
-//   filename,
-//   orgId,
-//   action,
-// }: {
-//   emails: string[];
-//   username: string;
-//   filename: string;
-//   orgId: string;
-//   action: string;
-// })=>{
-//   for (const email of emails) {
-//     const templateParams = {
-//       action: "uploaded",
-//       member: email,
-//       message: `User ${username} has uploaded the file ${filename} in your organization's folder (ID: ${orgId}).`,
-//     };
-
-//     const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({
-//         service_id: "service_ntg9ws8",  // Your service ID
-//         template_id: "IFMid",  // Your template ID
-//         user_id: "Ry69Fz_sOVenvOEFK8T9b",  // Your public key
-//         template_params: templateParams,
-//       }),
-//     });
-
-//     if (!response.ok) {
-//       console.error('Error sending email:', await response.text());
-//     } else {
-//       console.log('Email sent successfully:', await response.json());
-//     }
-//   }
-// }
 
 export const createFile = mutation({
   args: {
@@ -199,15 +184,6 @@ export const createFile = mutation({
     const username = hasAccess.user.name || "Unknown User";
     const emails = await getUserEmailsByOrgId(ctx, { orgId: args.orgId });
 
-    // if (emails.length > 0) {
-    //   await sendEmail({
-    //     emails,
-    //     username,
-    //     filename: args.name,
-    //     orgId: args.orgId,
-    //     action: "uploaded",
-    //   });
-    // }
   },
 });
 

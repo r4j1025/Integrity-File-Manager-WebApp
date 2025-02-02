@@ -4,7 +4,9 @@ import { v } from "convex/values";
 export const fileTypes = v.union(
   v.literal("image"),
   v.literal("csv"),
-  v.literal("pdf")
+  v.literal("pdf"),
+  v.literal("txt"),
+  v.literal("doc"),
 );
 
 export const roles = v.union(v.literal("admin"), v.literal("member"));
@@ -35,6 +37,7 @@ export default defineSchema({
       v.object({
         orgId: v.string(),
         role: roles,
+        orgName: v.string(),
       })
     ),
   }).index("by_tokenIdentifier", ["tokenIdentifier"]),

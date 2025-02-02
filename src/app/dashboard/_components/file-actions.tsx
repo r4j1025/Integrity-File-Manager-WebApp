@@ -29,7 +29,9 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
-import { Protect } from "@clerk/nextjs";
+import { Protect, useOrganization, useUser } from "@clerk/nextjs";
+import emailjs from '@emailjs/browser';
+
 
 export function FileCardActions({
   file,
@@ -44,6 +46,51 @@ export function FileCardActions({
   const logDownload = useMutation(api.files.logDownload);  // Mutation for logging the download
   const { toast } = useToast();
   const me = useQuery(api.users.getMe);
+
+
+  const organization = useOrganization();
+  const user = useUser();
+  let orgId: string | undefined = undefined;
+  if (organization.isLoaded && user.isLoaded) {
+    orgId = organization.organization?.id ?? user.user?.id;
+  }
+  const emails = useQuery(api.files.getUserEmailsByOrgId, orgId ? { orgId } : "skip" ) ?? [];
+    let orgName = "Your organization";
+    if(emails!==undefined){
+      orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
+    }
+
+
+  async function sendEmail(action: string) {
+    if (!orgId) return;
+    
+//////////////////////////////////////////////////////////////////////////////////////////////////
+      if(emails.length>0){
+        for (const email of emails) {
+          const templateParams = {
+            action: action,
+            member: email,
+            message: `User "${user?.user?.fullName}" has ${action} the file "${file.name}" in your organization's folder
+
+             Organization folder name: ${orgName}
+
+             (ID: ${orgId}).`,
+          };
+
+          emailjs
+            .send("service_ntg9ws8", "IFMid", templateParams, "ImV2HhBVWI1jG0VET")
+            .then(
+              (response) => {
+                console.log("SUCCESS!", response.status, response.text);
+              },
+              (err) => {
+                console.log("FAILED...", err);
+              }
+            );
+        }
+      }
+////////////////////////////////////////////////////////////////////////////////////////
+  }
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -65,6 +112,7 @@ export function FileCardActions({
                 await deleteFile({
                   fileId: file._id,
                 });
+                sendEmail("deleted");
                 toast({
                   variant: "default",
                   title: "File marked for deletion",
@@ -87,6 +135,8 @@ export function FileCardActions({
             onClick={async () => {
               if (!file.url) return;
               window.open(file.url, "_blank");
+
+              sendEmail("downloaded");
 
               // Call the logDownload mutation
               await logDownload({
