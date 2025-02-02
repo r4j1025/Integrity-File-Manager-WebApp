@@ -50,15 +50,14 @@ export function FileCardActions({
 
   const organization = useOrganization();
   const user = useUser();
+
   let orgId: string | undefined = undefined;
   if (organization.isLoaded && user.isLoaded) {
     orgId = organization.organization?.id ?? user.user?.id;
   }
   const emails = useQuery(api.files.getUserEmailsByOrgId, orgId ? { orgId } : "skip" ) ?? [];
-    let orgName = "Your organization";
-    if(emails!==undefined){
-      orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
-    }
+    let orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
+    
 
 
   async function sendEmail(action: string) {
