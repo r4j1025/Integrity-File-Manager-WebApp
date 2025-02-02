@@ -45,12 +45,15 @@ export function UploadButton() {
   const organization = useOrganization();
   const user = useUser();
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-  
-  
   let orgId: string | undefined = undefined;
   if (organization.isLoaded && user.isLoaded) {
     orgId = organization.organization?.id ?? user.user?.id;
   }
+  const emails = useQuery(api.files.getUserEmailsByOrgId, orgId ? { orgId } : "skip" ) ?? [];
+  let orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
+  
+  
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,11 +139,7 @@ export function UploadButton() {
     }
   }
 
-  const emails = useQuery(api.files.getUserEmailsByOrgId, orgId ? { orgId } : "skip" ) ?? [];
-  let orgName = "Your organization";
-  if(emails!==undefined){
-    orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
-  }
+  
     
 
   const createFile = useMutation(api.files.createFile);
