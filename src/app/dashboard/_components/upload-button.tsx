@@ -52,8 +52,15 @@ export function UploadButton() {
   const emails = useQuery(api.files.getUserEmailsByOrgId, orgId ? { orgId } : "skip" ) ?? [];
   let orgName = useQuery(api.files.getOrgNameByOrgId, orgId ? { orgId } : "skip" ) ?? "";
   
-  
-  
+  ////////////////////////////////////////////////////////////////
+  async function computeSHA256(file: File): Promise<string> {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+  /////////////////////////////////////////////////////////////////
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,12 +95,15 @@ export function UploadButton() {
       "text/csv": "csv",
     } as Record<string, Doc<"files">["type"]>;
 
+    const sha256Hash = await computeSHA256(values.file[0]); // ✅ Compute hash here
+
     try {
       await createFile({
         name: values.title,
         fileId: storageId,
         orgId,
         type: types[fileType],
+        hash: sha256Hash,  // ✅ Add this
       });
 
       form.reset();

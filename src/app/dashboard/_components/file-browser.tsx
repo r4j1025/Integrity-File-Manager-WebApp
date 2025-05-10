@@ -144,6 +144,19 @@ export function FileBrowser({
                   <div>
                     <strong>File name:</strong> {log.fileName}
                   </div>
+                   {/* ✅ Show hash only if it exists */}
+        {log.hash && (
+          <div className="break-all mt-2">
+            <strong>SHA-256 Hash:</strong> {log.hash}
+            <Button
+              className="ml-2 h-4 text-xs px-2 py-1"
+              variant="secondary"
+              onClick={() => navigator.clipboard.writeText(log.hash!)}
+            >
+              Copy
+            </Button>
+          </div>
+        )}
                     <div>
                       <strong>Action performed:</strong> {log.action}
                     </div>

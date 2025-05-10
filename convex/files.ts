@@ -126,7 +126,8 @@ export async function createLog(
   orgId: string,
   fileId: Id<"files">,
   fileName: string, // ✅ Include file name in logs
-  action: "uploaded" | "deleted" | "favorited" | "unfavorited" | "downloaded" | "restored"
+  action: "uploaded" | "deleted" | "favorited" | "unfavorited" | "downloaded" | "restored",
+  hash?: string // ✅ Add optional hash
 ) {
   const identity = await ctx.auth.getUserIdentity();
 
@@ -153,6 +154,7 @@ export async function createLog(
     fileName, // ✅ Include file name
     orgId,
     fileId,
+    ...(hash && { hash }),
   });
 }
 
@@ -163,6 +165,7 @@ export const createFile = mutation({
     fileId: v.id("_storage"),
     orgId: v.string(),
     type: fileTypes,
+    hash: v.string(), // ✅ Accept hash from frontend
   },
   async handler(ctx, args) {
     const hasAccess = await hasAccessToOrg(ctx, args.orgId);
@@ -179,7 +182,7 @@ export const createFile = mutation({
       userId: hasAccess.user._id,
     });
 
-    await createLog(ctx, args.orgId, file, args.name, "uploaded");
+    await createLog(ctx, args.orgId, file, args.name, "uploaded",args.hash);
 
     const username = hasAccess.user.name || "Unknown User";
     const emails = await getUserEmailsByOrgId(ctx, { orgId: args.orgId });

@@ -57,6 +57,7 @@ export default defineSchema({
     fileName: v.string(),  // ✅ Added file name for better tracking
     orgId: v.string(),         // Organization ID
     fileId: v.id("files"),     // File ID being affected
+    hash: v.optional(v.string()), // ✅ Add this line
   })
     .index("by_orgId", ["orgId"]),  // Index to query logs by organization
 
